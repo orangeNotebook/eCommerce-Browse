@@ -5,11 +5,31 @@ import '../App.css';
 export default function MainPage (){
   
   const [items, setItems] = useState([]);
+  const [category, setCategory] = useState("");
 
 
   function handleLink(nav) {
       window.location.href = nav;
       console.log('The link was clicked.')
+  }
+
+  function handleCategory(cat){
+    setCategory(cat);
+    let categoryJson = {category : cat};
+    // console.log(JSON.stringify(category))
+    fetch('http://localhost:4000/category', {
+      method: "POST",
+      headers: {
+        'Content-type': 'application/json'
+      },
+      body: JSON.stringify(categoryJson)
+    })
+    .then(response => response.json())
+    .then(response => {
+      setItems(response.data); 
+      // console.log(response)
+       })
+    .catch(err => console.error(err))
   }
 
 
@@ -18,11 +38,10 @@ export default function MainPage (){
     .then(response => response.json())
     .then(response => {
       setItems(response.data); 
-      console.log(response)
+      // console.log(response)
        })
     .catch(err => console.error(err))
   }
-
 
   useEffect(() => { 
     getBooks()
@@ -32,6 +51,11 @@ export default function MainPage (){
   return (
     <React.Fragment>
     <div>
+        <div class="product-category-btn">
+          <button type="button"  onClick={()=>{handleCategory("animals")}}>animals</button>
+          <button type="button" onClick={()=>{handleCategory("comics")}}>comics</button>
+          <button type="button" onClick={()=>{handleCategory("all")}}>all</button>
+       </div>
       {items.map((product)=>{
         return(
           <div className="wrapper">

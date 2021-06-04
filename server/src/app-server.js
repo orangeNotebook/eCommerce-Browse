@@ -14,12 +14,12 @@ connection.connect(err => {
     }
 })
 
-
-
-
 console.log(connection)
 
 app.use(cors())
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.get('/', (req, res) => {
     console.log("Working")
@@ -27,6 +27,32 @@ app.get('/', (req, res) => {
 
 app.get('/products', (req, res) => {
     connection.query(SELECT_ALL_PRODUCTS, (err, results) => {
+        if(err) {
+            return res.send(err)
+        }
+        else {
+            return res.json({
+                data: results
+            })
+        }
+    })
+})
+
+app.post('/category', (req, res) => {
+    let SELECT_CATEGORISED_PRODUCTS;
+    const chosenCategory = (req.body.category);
+
+    // console.log(chosenCategory)
+    
+
+    if(chosenCategory == "all"){
+        SELECT_CATEGORISED_PRODUCTS = SELECT_ALL_PRODUCTS
+    }else{
+        SELECT_CATEGORISED_PRODUCTS = ("SELECT * FROM microservices.productdetails WHERE microservices.productdetails.category LIKE '" + chosenCategory + "'")
+    }
+    
+
+    connection.query(SELECT_CATEGORISED_PRODUCTS, (err, results) => {
         if(err) {
             return res.send(err)
         }
@@ -72,32 +98,6 @@ app.get('/product-details/:id', (req, res) => {
         }
     })
 })
-
-
-
-// app.get('/products', async(req, res) => {
-//     try {
-//     let products = await DB.Products.all()
-//     res.json(products)
-//     } catch(e) {
-//         console.log(e)
-//         res.sendStatus(500)
-//     }
-// })
-
-
-// app.get('/products/add', (req, res) => {
-//     const { name, details, price, reviews, ratings } = req.query
-//     const INSERT_PRODUCTS = `INSERT INTO productdetails (name, details, price, reviews, ratings) VALUES('${name}', ${details}, ${price}, ${reviews}, ${ratings})`
-//     connection.query(INSERT_PRODUCTS, (err, results) => {
-//         if(err) {
-//             return res.send(err)
-//         }
-//         else {
-//             return res.send('sucess')
-//         }
-//     })
-// })
 
 const port = process.env.PORT || 4000;
 app.listen(port, () => console.log(`Example app listening at http://localhost:${port}`));
